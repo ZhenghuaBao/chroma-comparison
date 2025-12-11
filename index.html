@@ -18,6 +18,13 @@
             padding: 20px;
         }
 
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            }
+        }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -547,12 +554,58 @@
 
             content.innerHTML = `
                 <div class="completion-message">
+                    <h2>⏳ Submitting Results...</h2>
+                    <p>Please wait while we save your responses.</p>
+                </div>
+            `;
+
+            // Submit to Formspree
+            submitToFormspree(results);
+        }
+
+        function submitToFormspree(results) {
+            const formData = new FormData();
+            formData.append('status', results._status);
+            formData.append('date', results._date);
+            formData.append('responses', JSON.stringify(results.responses, null, 2));
+            
+            // Add individual responses for easier reading in email
+            for (const [key, value] of Object.entries(results.responses)) {
+                formData.append(key, value);
+            }
+
+            fetch('https://formspree.io/f/xvgevpye', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showSuccessMessage(results);
+                } else {
+                    showErrorMessage(results);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorMessage(results);
+            });
+        }
+
+        function showSuccessMessage(results) {
+            const content = document.getElementById('content');
+            const resultsJSON = JSON.stringify(results, null, 2);
+
+            content.innerHTML = `
+                <div class="completion-message">
                     <h2>✅ Evaluation Complete!</h2>
                     <p>Thank you for completing the voice quality evaluation.</p>
-                    <p>Your responses have been recorded below.</p>
+                    <p><strong>Your responses have been successfully submitted!</strong></p>
 
                     <div class="results-box">
-                        <h3 style="margin-bottom: 15px; color: #495057;">Results:</h3>
+                        <h3 style="margin-bottom: 15px; color: #495057;">Your Results:</h3>
                         <pre>${resultsJSON}</pre>
                         <button class="download-button" onclick="downloadResults()">
                             📥 Download Results (JSON)
@@ -567,6 +620,56 @@
                     </button>
                 </div>
             `;
+        }
+
+        function showErrorMessage(results) {
+            const content = document.getElementById('content');
+            const resultsJSON = JSON.stringify(results, null, 2);
+
+            content.innerHTML = `
+                <div class="completion-message">
+                    <h2 style="color: #dc3545;">⚠️ Submission Failed</h2>
+                    <p>We couldn't submit your responses automatically.</p>
+                    <p>Please download your results and send them manually.</p>
+
+                    <div class="results-box">
+                        <h3 style="margin-bottom: 15px; color: #495057;">Your Results:</h3>
+                        <pre>${resultsJSON}</pre>
+                        <button class="download-button" onclick="downloadResults()">
+                            📥 Download Results (JSON)
+                        </button>
+                        <button class="download-button" onclick="copyResults()" style="margin-left: 10px;">
+                            📋 Copy to Clipboard
+                        </button>
+                        <button class="download-button" onclick="retrySubmit()" style="margin-left: 10px; background: #28a745;">
+                            🔄 Retry Submission
+                        </button>
+                    </div>
+
+                    <button class="submit-button" onclick="location.reload()">
+                        Start New Evaluation
+                    </button>
+                </div>
+            `;
+        }
+
+        function retrySubmit() {
+            const timestamp = new Date().toISOString();
+            const results = {
+                _status: 'completed',
+                _date: timestamp,
+                responses: responses
+            };
+            
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="completion-message">
+                    <h2>⏳ Retrying Submission...</h2>
+                    <p>Please wait while we try again.</p>
+                </div>
+            `;
+            
+            submitToFormspree(results);
         }
 
         function downloadResults() {
