@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Quality Test - Reference vs ElevenLabs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 30px;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-box p {
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .progress-text {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .question-text {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question-text p {
+            color: #495057;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .audio-section {
+            margin-bottom: 25px;
+        }
+
+        .audio-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .reference-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 2px solid #ffc107;
+        }
+
+        .reference-section .audio-label {
+            color: #856404;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 25px;
+            outline: none;
+        }
+
+        audio::-webkit-media-controls-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-button {
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .option-button:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .option-button.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .secondary-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .secondary-option {
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .secondary-option:hover {
+            border-color: #6c757d;
+            background: #f8f9fa;
+        }
+
+        .secondary-option.selected {
+            background: #6c757d;
+            color: white;
+            border-color: #6c757d;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .prev-button {
+            background: #6c757d;
+            color: white;
+        }
+
+        .prev-button:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .next-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .next-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .completion-message {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .completion-message h2 {
+            color: #28a745;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .completion-message p {
+            color: #6c757d;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .results-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .results-box pre {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .download-button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .download-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .options-grid, .secondary-options {
+                grid-template-columns: 1fr;
+            }
+
+            .navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span>🎤</span>
+                Speaker Similarity Evaluation
+            </h1>
+            <p>Reference vs ElevenLabs Voice Cloning Comparison</p>
+        </div>
+
+        <div class="info-box">
+            <h3>📋 Instructions</h3>
+            <p>Listen to the <strong>Reference</strong> audio first. Then decide which of the two samples (A or B) sounds more similar to the reference speaker. Consider: voice quality, speaking speed, rhythm, and overall style.</p>
+        </div>
+
+        <div class="content" id="content">
+            <!-- Questions will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script>
+        let audioData = {};
+        let currentQuestion = 0;
+        let responses = {};
+
+        // Load audio mapping
+        fetch('audio_mapping_others.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data.similarity;
+                renderQuestion();
+            })
+            .catch(error => {
+                console.error('Error loading audio data:', error);
+                document.getElementById('content').innerHTML = 
+                    '<div class="completion-message"><h2>Error</h2><p>Failed to load audio data. Please make sure audio_mapping_others.json is in the same directory.</p></div>';
+            });
+
+        function renderQuestion() {
+            const content = document.getElementById('content');
+            
+            if (currentQuestion >= audioData.length) {
+                showCompletion();
+                return;
+            }
+
+            const question = audioData[currentQuestion];
+            const questionNum = currentQuestion + 1;
+            const totalQuestions = audioData.length;
+
+            content.innerHTML = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="question-number">Sample ${questionNum}</div>
+                        <div class="progress-text">${questionNum} of ${totalQuestions}</div>
+                    </div>
+
+                    <div class="question-text">
+                        <p><strong>Text:</strong> ${question.text}</p>
+                    </div>
+
+                    <div class="reference-section">
+                        <label class="audio-label">🎯 Reference:</label>
+                        <audio controls preload="auto">
+                            <source src="${question.reference.display_file}" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+
+                    <div class="audio-section">
+                        <label class="audio-label">Option A:</label>
+                        <audio controls preload="auto">
+                            <source src="${question.option_a.display_file}" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+
+                    <div class="audio-section">
+                        <label class="audio-label">Option B:</label>
+                        <audio controls preload="auto">
+                            <source src="${question.option_b.display_file}" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+
+                    <div class="options-grid">
+                        <button class="option-button" onclick="selectOption('A')" id="option-A">
+                            A is more similar
+                        </button>
+                        <button class="option-button" onclick="selectOption('B')" id="option-B">
+                            B is more similar
+                        </button>
+                    </div>
+
+                    <div class="secondary-options">
+                        <button class="secondary-option" onclick="selectOption('same')" id="option-same">
+                            About the same
+                        </button>
+                        <button class="secondary-option" onclick="selectOption('unsure')" id="option-unsure">
+                            Hard to tell
+                        </button>
+                    </div>
+
+                    <div class="navigation">
+                        <button class="nav-button prev-button" onclick="previousQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>
+                            ← Previous
+                        </button>
+                        <button class="nav-button next-button" onclick="nextQuestion()" id="next-button" disabled>
+                            ${currentQuestion === totalQuestions - 1 ? 'Finish' : 'Next →'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Restore previous selection if exists
+            if (responses[question.question_id]) {
+                selectOption(responses[question.question_id], false);
+            }
+        }
+
+        function selectOption(option, enableNext = true) {
+            // Remove all selected states
+            document.querySelectorAll('.option-button, .secondary-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Add selected state to clicked option
+            const optionElement = document.getElementById(`option-${option}`);
+            if (optionElement) {
+                optionElement.classList.add('selected');
+            }
+
+            // Store response
+            const question = audioData[currentQuestion];
+            responses[question.question_id] = option;
+
+            // Enable next button
+            if (enableNext) {
+                document.getElementById('next-button').disabled = false;
+            }
+        }
+
+        function nextQuestion() {
+            const question = audioData[currentQuestion];
+            if (!responses[question.question_id]) {
+                alert('Please select an option before continuing.');
+                return;
+            }
+
+            currentQuestion++;
+            renderQuestion();
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function showCompletion() {
+            const content = document.getElementById('content');
+            
+            // Prepare results
+            const timestamp = new Date().toISOString();
+            const results = {
+                _status: 'completed',
+                _date: timestamp,
+                responses: responses
+            };
+
+            const resultsJSON = JSON.stringify(results, null, 2);
+
+            content.innerHTML = `
+                <div class="completion-message">
+                    <h2>✅ Evaluation Complete!</h2>
+                    <p>Thank you for completing the voice quality evaluation.</p>
+                    <p>Your responses have been recorded below.</p>
+
+                    <div class="results-box">
+                        <h3 style="margin-bottom: 15px; color: #495057;">Results:</h3>
+                        <pre>${resultsJSON}</pre>
+                        <button class="download-button" onclick="downloadResults()">
+                            📥 Download Results (JSON)
+                        </button>
+                        <button class="download-button" onclick="copyResults()" style="margin-left: 10px;">
+                            📋 Copy to Clipboard
+                        </button>
+                    </div>
+
+                    <button class="submit-button" onclick="location.reload()">
+                        Start New Evaluation
+                    </button>
+                </div>
+            `;
+        }
+
+        function downloadResults() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const results = {
+                _status: 'completed',
+                _date: new Date().toISOString(),
+                responses: responses
+            };
+
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `voice_evaluation_results_${timestamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyResults() {
+            const results = {
+                _status: 'completed',
+                _date: new Date().toISOString(),
+                responses: responses
+            };
+
+            navigator.clipboard.writeText(JSON.stringify(results, null, 2))
+                .then(() => alert('Results copied to clipboard!'))
+                .catch(err => console.error('Failed to copy:', err));
+        }
+    </script>
+</body>
+</html>
+
