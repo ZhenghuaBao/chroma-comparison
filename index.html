@@ -347,14 +347,14 @@
         <div class="header">
             <h1>
                 <span>🎤</span>
-                Speaker Similarity Evaluation
+                Naturalness Evaluation
             </h1>
-            <p>Reference vs ElevenLabs Voice Cloning Comparison</p>
+            <p>Reference vs ElevenLabs Voice Quality Comparison</p>
         </div>
 
         <div class="info-box">
             <h3>📋 Instructions</h3>
-            <p>Listen to the <strong>Reference</strong> audio first. Then decide which of the two samples (A or B) sounds more similar to the reference speaker. Consider: voice quality, speaking speed, rhythm, and overall style.</p>
+            <p>Listen to both samples (A and B) and decide which one sounds more <strong>natural and human-like</strong>. Consider: voice quality, speaking speed, rhythm, and overall naturalness.</p>
         </div>
 
         <div class="content" id="content">
@@ -403,14 +403,6 @@
                         <p><strong>Text:</strong> ${question.text}</p>
                     </div>
 
-                    <div class="reference-section">
-                        <label class="audio-label">🎯 Reference:</label>
-                        <audio controls preload="auto">
-                            <source src="${question.reference.display_file}" type="audio/wav">
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>
-
                     <div class="audio-section">
                         <label class="audio-label">Option A:</label>
                         <audio controls preload="auto">
@@ -429,10 +421,10 @@
 
                     <div class="options-grid">
                         <button class="option-button" onclick="selectOption('A')" id="option-A">
-                            A is more similar
+                            A sounds more natural
                         </button>
                         <button class="option-button" onclick="selectOption('B')" id="option-B">
-                            B is more similar
+                            B sounds more natural
                         </button>
                     </div>
 
