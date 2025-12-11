@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Quality Test - Reference vs ElevenLabs</title>
+    <title>Voice Quality Test</title>
     <style>
         * {
             margin: 0;
@@ -123,18 +123,6 @@
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-        }
-
-        .reference-section {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border: 2px solid #ffc107;
-        }
-
-        .reference-section .audio-label {
-            color: #856404;
         }
 
         audio {
@@ -347,14 +335,14 @@
         <div class="header">
             <h1>
                 <span>🎤</span>
-                Naturalness Evaluation
+                Voice Quality Evaluation
             </h1>
-            <p>Reference vs ElevenLabs Voice Quality Comparison</p>
+            <p>Help us evaluate speech synthesis quality</p>
         </div>
 
         <div class="info-box">
             <h3>📋 Instructions</h3>
-            <p>Listen to both samples (A and B) and decide which one sounds more <strong>natural and human-like</strong>. Consider: voice quality, speaking speed, rhythm, and overall naturalness.</p>
+            <p>Listen to both audio samples (A and B) and decide which one sounds more <strong>natural and human-like</strong>. Consider overall voice quality, speaking speed, rhythm, and naturalness.</p>
         </div>
 
         <div class="content" id="content">
@@ -363,22 +351,72 @@
     </div>
 
     <script>
-        let audioData = {};
+        // Sample data embedded directly (no external JSON needed)
+        const audioData = [
+            {
+                id: "sim1",
+                text: "Fortunately, there are lots of ways to work around this limitation and use it with whatever operating system you want.",
+                audio_a: "audio_others/sim1_a.wav",
+                audio_b: "audio_others/sim1_b.wav"
+            },
+            {
+                id: "sim2",
+                text: "The municipality consists of the following sub-municipalities: Daverdisse proper, Gembes, Haut-Fays, and Porcheresse.",
+                audio_a: "audio_others/sim2_a.wav",
+                audio_b: "audio_others/sim2_b.wav"
+            },
+            {
+                id: "sim3",
+                text: "Therefore, the first wavelet-based denoising methods were based on thresholding of detail subbands coefficients.",
+                audio_a: "audio_others/sim3_a.wav",
+                audio_b: "audio_others/sim3_b.wav"
+            },
+            {
+                id: "sim4",
+                text: "He greatly enlarged Wagner's original collection by further field collection, purchases and other acquisitions.",
+                audio_a: "audio_others/sim4_a.wav",
+                audio_b: "audio_others/sim4_b.wav"
+            },
+            {
+                id: "sim5",
+                text: "In virtually every organism analyzed, methylation in promoter regions correlates negatively with gene expression.",
+                audio_a: "audio_others/sim5_a.wav",
+                audio_b: "audio_others/sim5_b.wav"
+            },
+            {
+                id: "sim6",
+                text: "Jean-Baptiste Bernadotte fought in Balland's division and Michel Ney was probably in Fromentin's division.",
+                audio_a: "audio_others/sim6_a.wav",
+                audio_b: "audio_others/sim6_b.wav"
+            },
+            {
+                id: "sim7",
+                text: "Yeah, it's definitely worth checking out, especially if the pay is reasonable and the work is good for your career. There was absolutely no reason for her to announce it to the entire company.",
+                audio_a: "audio_others/sim7_a.wav",
+                audio_b: "audio_others/sim7_b.wav"
+            },
+            {
+                id: "sim8",
+                text: "The aircraft had a largely conventional semi-monocoque fuselage, with the engines in underwing nacelles.",
+                audio_a: "audio_others/sim8_a.wav",
+                audio_b: "audio_others/sim8_b.wav"
+            },
+            {
+                id: "sim9",
+                text: "Rockingham-produced earthenware is often transfer printed, but occasionally enamelled pieces may be found.",
+                audio_a: "audio_others/sim9_a.wav",
+                audio_b: "audio_others/sim9_b.wav"
+            },
+            {
+                id: "sim10",
+                text: "At present, the station's satellite coverage reaches Asia, Europe, and Australia in several languages.",
+                audio_a: "audio_others/sim10_a.wav",
+                audio_b: "audio_others/sim10_b.wav"
+            }
+        ];
+
         let currentQuestion = 0;
         let responses = {};
-
-        // Load audio mapping
-        fetch('audio_mapping_others.json')
-            .then(response => response.json())
-            .then(data => {
-                audioData = data.similarity;
-                renderQuestion();
-            })
-            .catch(error => {
-                console.error('Error loading audio data:', error);
-                document.getElementById('content').innerHTML = 
-                    '<div class="completion-message"><h2>Error</h2><p>Failed to load audio data. Please make sure audio_mapping_others.json is in the same directory.</p></div>';
-            });
 
         function renderQuestion() {
             const content = document.getElementById('content');
@@ -406,7 +444,7 @@
                     <div class="audio-section">
                         <label class="audio-label">Option A:</label>
                         <audio controls preload="auto">
-                            <source src="${question.option_a.display_file}" type="audio/wav">
+                            <source src="${question.audio_a}" type="audio/wav">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
@@ -414,7 +452,7 @@
                     <div class="audio-section">
                         <label class="audio-label">Option B:</label>
                         <audio controls preload="auto">
-                            <source src="${question.option_b.display_file}" type="audio/wav">
+                            <source src="${question.audio_b}" type="audio/wav">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
@@ -449,8 +487,8 @@
             `;
 
             // Restore previous selection if exists
-            if (responses[question.question_id]) {
-                selectOption(responses[question.question_id], false);
+            if (responses[question.id]) {
+                selectOption(responses[question.id], false);
             }
         }
 
@@ -468,7 +506,7 @@
 
             // Store response
             const question = audioData[currentQuestion];
-            responses[question.question_id] = option;
+            responses[question.id] = option;
 
             // Enable next button
             if (enableNext) {
@@ -478,7 +516,7 @@
 
         function nextQuestion() {
             const question = audioData[currentQuestion];
-            if (!responses[question.question_id]) {
+            if (!responses[question.id]) {
                 alert('Please select an option before continuing.');
                 return;
             }
@@ -561,7 +599,9 @@
                 .then(() => alert('Results copied to clipboard!'))
                 .catch(err => console.error('Failed to copy:', err));
         }
+
+        // Initialize on page load
+        renderQuestion();
     </script>
 </body>
 </html>
-
